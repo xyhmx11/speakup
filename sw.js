@@ -1,5 +1,5 @@
-/* 口语帮手 Service Worker：缓存页面与应用图标，支持离线打开 */
-const CACHE = "speakup-v2";
+/* 法兰外贸英语助手 Service Worker：缓存页面与应用图标，支持离线打开 */
+const CACHE = "flange-eng-v4";
 const ASSETS = [
   "./",
   "./index.html",

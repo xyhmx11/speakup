@@ -1,7 +1,7 @@
 {
-  "name": "口语帮手 - 英语口语练习",
-  "short_name": "口语帮手",
-  "description": "拍照识别英文单词 + 语音输入英文句子纠错，英语口语练习助手",
+  "name": "法兰外贸英语助手",
+  "short_name": "法兰英语助手",
+  "description": "法兰外贸业务英语：MPS 文件解答会议对话、锻造工艺术语、常用句库、语音纠错，手机端直接使用",
   "lang": "zh-CN",
   "start_url": "./index.html",
   "scope": "./",
