@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#5b5bf0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="口语帮手">
+<meta name="description" content="英语口语练习：拍照识英文单词 + 语音输入英文句子纠错">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/pwa/apple-touch-icon-180.png">
+<link rel="apple-touch-icon" sizes="167x167" href="icons/pwa/apple-touch-icon-167.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icons/pwa/apple-touch-icon-152.png">
+<link rel="apple-touch-icon" sizes="120x120" href="icons/pwa/apple-touch-icon-120.png">
+<title>口语帮手 · 英语口语练习</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --pri:#5b5bf0;--pri2:#8b5cf6;--ink:#1e2340;--mut:#6b7280;
+  --bg:#f3f4ff;--card:#ffffff;--ok:#10b981;--warn:#f59e0b;--bad:#ef4444;
+  --line:#e6e8f3;--r:16px;
+}
+html{font-size:16px}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  background:linear-gradient(180deg,#eef0ff,#f8f8ff 32%,#f3f4ff);color:var(--ink);min-height:100vh}
+/* 启动画面 */
+#splash{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:linear-gradient(160deg,#7c5bff,#5b5bf0 40%,#10b981);color:#fff;transition:opacity .4s ease;}
+#splash.hide{opacity:0;pointer-events:none;}
+#splash .si{width:110px;height:110px;border-radius:28px;background:#fff;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 12px 30px rgba(0,0,0,.18);margin-bottom:22px;animation:splashPulse 1.6s ease-in-out infinite;}
+#splash .si svg{width:62px;height:62px;}
+#splash .st{font-size:24px;font-weight:700;letter-spacing:2px;}
+#splash .ss{font-size:14px;opacity:.8;margin-top:6px;}
+@keyframes splashPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.app{max-width:480px;margin:0 auto;padding:0 14px 104px}
+header{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;padding:14px 2px 10px;
+  background:linear-gradient(180deg,rgba(238,240,255,.97),rgba(238,240,255,.8));backdrop-filter:blur(8px)}
+.logo{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--pri),var(--pri2));
+  display:flex;align-items:center;justify-content:center;color:#fff;flex:0 0 auto}
+.logo svg{width:22px;height:22px}
+.hd-t{flex:1;min-width:0}
+.hd-t h1{font-size:17px;line-height:1.2}
+.hd-t p{font-size:11.5px;color:var(--mut);margin-top:2px}
+.icon-btn{width:36px;height:36px;border:0;border-radius:10px;background:rgba(91,91,240,.1);color:var(--pri);
+  display:flex;align-items:center;justify-content:center;cursor:pointer}
+.icon-btn svg{width:19px;height:19px}
+main{display:block}
+.tab-page{display:none;animation:fade .25s ease}
+.tab-page.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border-radius:var(--r);box-shadow:0 2px 14px rgba(31,35,64,.06);padding:16px;margin-top:14px}
+.card h2{font-size:15px;display:flex;align-items:center;gap:7px;margin-bottom:10px}
+.card h2 svg{width:17px;height:17px;color:var(--pri)}
+.btn-row{display:flex;gap:10px}
+.btn{flex:1;border:0;border-radius:12px;padding:12px 10px;font-size:14px;font-weight:600;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:7px;transition:transform .08s,opacity .15s}
+.btn:active{transform:scale(.97)}
+.btn svg{width:18px;height:18px}
+.btn-pri{background:linear-gradient(135deg,var(--pri),var(--pri2));color:#fff}
+.btn-ghost{background:#eef0ff;color:var(--pri)}
+.btn-line{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+.btn[disabled]{opacity:.45;pointer-events:none}
+.img-box{position:relative;margin-top:12px;border-radius:14px;overflow:hidden;background:#0f1226;min-height:140px;display:none}
+.img-box.show{display:block}
+.img-box img,.img-box canvas{width:100%;display:block}
+.img-box canvas{position:absolute;inset:0}
+.ph{display:flex;flex-direction:column;align-items:center;justify-content:center;color:#a6a9c9;padding:34px 16px;text-align:center;gap:8px}
+.ph svg{width:44px;height:44px;opacity:.6}
+.status{font-size:12.5px;color:var(--mut);margin-top:10px;min-height:18px;display:flex;align-items:center;gap:6px}
+.spin{width:14px;height:14px;border-radius:50%;border:2px solid #d8daf5;border-top-color:var(--pri);animation:rot .8s linear infinite;display:inline-block}
+@keyframes rot{to{transform:rotate(360deg)}}
+.word-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.wcard{background:#f7f8ff;border:1px solid var(--line);border-radius:12px;padding:10px 11px;display:flex;flex-direction:column;gap:6px}
+.wcard .en{font-size:15px;font-weight:700;color:var(--pri);word-break:break-all}
+.wcard .zh{font-size:12.5px;color:var(--mut)}
+.wcard .meta{font-size:11px;color:var(--ok)}
+.wcard .btns{display:flex;gap:6px;margin-top:2px}
+.mini{flex:1;border:0;border-radius:8px;padding:6px 4px;font-size:12px;font-weight:600;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:4px;background:#eef0ff;color:var(--pri)}
+.mini svg{width:13px;height:13px}
+.mini.solid{background:var(--pri);color:#fff}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.chip{border:0;background:#fff;border:1.5px solid var(--line);border-radius:999px;padding:7px 12px;font-size:12.5px;color:var(--ink);cursor:pointer;transition:all .15s}
+.chip.on{background:var(--pri);border-color:var(--pri);color:#fff}
+.mic-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px 0 6px}
+.mic{width:78px;height:78px;border-radius:50%;border:0;background:linear-gradient(135deg,var(--pri),var(--pri2));color:#fff;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;box-shadow:0 8px 22px rgba(91,91,240,.35)}
+.mic svg{width:32px;height:32px}
+.mic::after{content:"";position:absolute;inset:-9px;border-radius:50%;border:2px solid rgba(91,91,240,.45);opacity:0}
+.mic.listening{background:linear-gradient(135deg,#ef4444,#f97316);box-shadow:0 8px 22px rgba(239,68,68,.4)}
+.mic.listening::after{opacity:1;animation:ping 1.4s ease-out infinite}
+@keyframes ping{0%{transform:scale(.85);opacity:.9}100%{transform:scale(1.45);opacity:0}}
+.mic-tip{font-size:13px;color:var(--mut)}
+.mic-tip.live{color:var(--pri);font-weight:600;min-height:18px;text-align:center}
+textarea{width:100%;min-height:110px;border:1.5px solid var(--line);border-radius:12px;padding:12px;font-size:15px;
+  font-family:inherit;resize:vertical;outline:none;background:#fbfbff;color:var(--ink)}
+textarea:focus{border-color:var(--pri)}
+textarea[readonly]{background:#f2f3fb}
+.note{font-size:11.5px;color:#9aa0b8;margin-top:8px;line-height:1.6}
+.result{display:none;animation:fade .25s ease}
+.result.show{display:block}
+.score-wrap{display:flex;align-items:center;gap:16px;margin-bottom:12px}
+.score-ring{width:76px;height:76px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.score-ring .in{width:60px;height:60px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.score-ring .num{font-size:20px;font-weight:800;color:var(--ink);line-height:1}
+.score-ring .cap{font-size:10px;color:var(--mut)}
+.score-info{flex:1;min-width:0}
+.score-info .grade{font-size:16px;font-weight:700}
+.score-info .desc{font-size:12.5px;color:var(--mut);margin-top:3px;line-height:1.5}
+.sent{background:#f7f8ff;border-radius:12px;padding:12px;margin-bottom:10px}
+.sent .lab{font-size:11.5px;color:var(--mut);margin-bottom:4px}
+.sent .txt{font-size:15px;line-height:1.6;word-break:break-word}
+.sent .txt b{color:var(--bad);font-weight:700}
+.sent .txt .fix{color:var(--ok);font-weight:700}
+.issue{display:flex;gap:10px;padding:11px 0;border-top:1px dashed var(--line)}
+.issue:first-of-type{border-top:0}
+.issue .tag{flex:0 0 auto;width:52px;height:24px;border-radius:8px;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700}
+.tag-grammar{background:#fdeaea;color:var(--bad)}
+.tag-cn{background:#fff3e0;color:var(--warn)}
+.tag-spell{background:#e8f4ff;color:#2563eb}
+.tag-punct{background:#eef0ff;color:var(--pri)}
+.issue .body{flex:1;min-width:0}
+.issue .org{font-size:13px;color:var(--bad)}
+.issue .sug{font-size:13.5px;color:var(--ok);font-weight:600}
+.issue .det{font-size:12px;color:var(--mut);margin-top:3px;line-height:1.5}
+.arrow{color:#b6bad8;padding:0 3px}
+.empty{text-align:center;color:#a6a9c9;padding:26px 10px;font-size:13.5px;line-height:1.8}
+.vitem{display:flex;align-items:center;gap:10px;padding:11px 0;border-top:1px solid var(--line)}
+.vitem:first-of-type{border-top:0}
+.vitem .en{font-size:15px;font-weight:700;color:var(--pri)}
+.vitem .zh{font-size:12.5px;color:var(--mut)}
+.vitem .tm{font-size:10.5px;color:#b3b8d4;margin-top:2px}
+.vitem .ops{margin-left:auto;display:flex;gap:6px}
+.hitem{padding:11px 0;border-top:1px solid var(--line);cursor:pointer}
+.hitem:first-of-type{border-top:0}
+.hitem .cs{font-size:14.5px;font-weight:600;line-height:1.5;word-break:break-word}
+.hitem .meta{font-size:11.5px;color:var(--mut);margin-top:4px;display:flex;gap:8px;flex-wrap:wrap}
+.hitem .meta .sc{color:var(--pri);font-weight:700}
+.hitem .det{display:none;font-size:12.5px;color:var(--mut);margin-top:8px;background:#f7f8ff;border-radius:10px;padding:10px;line-height:1.7;word-break:break-word}
+.hitem.open .det{display:block}
+.tabbar{position:fixed;bottom:0;left:0;right:0;z-index:30;display:flex;justify-content:center;
+  background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-top:1px solid var(--line);
+  padding:8px 12px calc(10px + env(safe-area-inset-bottom))}
+.tabbar-in{max-width:480px;width:100%;display:flex}
+.tab{flex:1;border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:6px 0;font-size:11px;color:var(--mut);cursor:pointer}
+.tab svg{width:22px;height:22px}
+.tab.on{color:var(--pri);font-weight:700}
+.toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%) translateY(8px);background:#22263f;color:#fff;
+  font-size:13px;padding:10px 18px;border-radius:12px;opacity:0;pointer-events:none;transition:all .25s;z-index:60;max-width:86vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.mask{position:fixed;inset:0;background:rgba(20,23,44,.45);z-index:50;display:none;align-items:flex-end;justify-content:center}
+.mask.show{display:flex}
+.sheet{background:#fff;width:100%;max-width:480px;border-radius:20px 20px 0 0;padding:18px 18px calc(22px + env(safe-area-inset-bottom));max-height:78vh;overflow:auto}
+.sheet h3{font-size:16px;margin-bottom:12px}
+.sheet p,.sheet li{font-size:13px;color:#4b5070;line-height:1.8}
+.sheet ul{margin:4px 0 8px 16px}
+.sheet b{color:var(--pri)}
+.add-row{display:flex;gap:8px;margin-top:10px}
+.add-row input{flex:1;border:1.5px solid var(--line);border-radius:10px;padding:10px;font-size:14px;outline:none;background:#fbfbff}
+.add-row input:focus{border-color:var(--pri)}
+.foot-tip{text-align:center;font-size:11px;color:#a6a9c9;margin-top:18px;line-height:1.7}
+</style>
+</head>
+<body>
+<div id="splash">
+  <div class="si">
+    <svg viewBox="0 0 64 64" fill="none">
+      <path d="M32 10C19.85 10 10 19.85 10 32s9.85 22 22 22 22-9.85 22-22S44.15 10 32 10z" fill="#5b5bf0"/>
+      <path d="M32 16c-8.84 0-16 7.16-16 16s7.16 16 16 16 16-7.16 16-16-7.16-16-16-16z" fill="#fff"/>
+      <text x="32" y="42" text-anchor="middle" font-size="22" font-weight="700" fill="#5b5bf0">A</text>
+      <path d="M20 50l-5 5v-10l5 5z" fill="#fff"/>
+    </svg>
+  </div>
+  <div class="st">SpeakUp</div>
+  <div class="ss">口语帮手</div>
+</div>
+<div class="app">
+
+  <header>
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 1 1-3.3-6.4"/><path d="M12 9v4l2.5 1.5"/></svg>
+    </div>
+    <div class="hd-t">
+      <h1>口语帮手</h1>
+      <p>拍照识单词 · 语音纠错句</p>
+    </div>
+    <button class="icon-btn" id="btnHelp" title="使用说明">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.3 9.3a2.8 2.8 0 1 1 3.7 2.7c-.8.3-1 .8-1 1.7"/><circle cx="12" cy="17.2" r=".4" fill="currentColor"/></svg>
+    </button>
+  </header>
+
+  <main>
+    <!-- ============ 看图识词 ============ -->
+    <section class="tab-page on" id="pageImage">
+      <div class="btn-row">
+        <button class="btn btn-pri" id="btnCamera">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h2.5L8 5.5h8L17.5 8H20a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 20 20H4a1.5 1.5 0 0 1-1.5-1.5v-9A1.5 1.5 0 0 1 4 8z"/><circle cx="12" cy="13.5" r="3.5"/></svg>
+          拍照识别
+        </button>
+        <button class="btn btn-ghost" id="btnUpload">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="9" cy="10" r="1.6"/><path d="M3.5 16.5 8 12.5l3.2 2.8 2.3-2 7 4.5"/></svg>
+          上传图片
+        </button>
+      </div>
+      <input type="file" id="cameraInput" accept="image/*" capture="environment" hidden>
+      <input type="file" id="uploadInput" accept="image/*" hidden>
+
+      <div class="card">
+        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7"/></svg>识别结果</h2>
+        <div class="img-box" id="imgBox">
+          <img id="imgEl" alt="待识别图片">
+          <canvas id="cvEl"></canvas>
+        </div>
+        <div class="ph" id="imgPh">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h2.5L8 5.5h8L17.5 8H20a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 20 20H4a1.5 1.5 0 0 1-1.5-1.5v-9A1.5 1.5 0 0 1 4 8z"/><circle cx="12" cy="13.5" r="3.5"/></svg>
+          <div>拍照或上传一张图片<br>自动识别图中的物品英文单词</div>
+        </div>
+        <div class="status" id="imgStatus"></div>
+        <div class="word-grid" id="wordGrid"></div>
+      </div>
+
+      <div class="card">
+        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>手动添加单词</h2>
+        <div class="add-row">
+          <input id="manualWord" placeholder="输入英文，如：umbrella 雨伞" enterkeyhint="done">
+          <button class="btn btn-ghost" id="btnAddWord" style="flex:0 0 auto;padding:10px 16px">添加</button>
+        </div>
+        <div class="note">可以填“英文 中文”，空格分开；只填英文也可以。手动添加的单词会进入词汇本。</div>
+      </div>
+    </section>
+
+    <!-- ============ 口语纠错 ============ -->
+    <section class="tab-page" id="pageSpeak">
+      <div class="card">
+        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>语音输入句子</h2>
+        <div class="chips" id="modeChips">
+          <button class="chip on" data-mode="en">英文为主</button>
+          <button class="chip" data-mode="zh">中文为主</button>
+        </div>
+        <div class="mic-wrap">
+          <button class="mic" id="btnMic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+          </button>
+          <div class="mic-tip" id="micTip">点击开始说话</div>
+          <div class="mic-tip live" id="liveText"></div>
+        </div>
+        <textarea id="sentence" placeholder="语音识别结果会自动出现在这里，也可以直接打字输入英文句子（可夹杂中文词）"></textarea>
+        <div class="note">提示：语音识别需要 Chrome / Edge 浏览器，且通过 https 或 localhost 访问才可用；中英夹杂时，中文词可能被识别成英文拼音，可直接在文本框里修改。</div>
+        <div style="margin-top:12px;display:flex;gap:10px">
+          <button class="btn btn-pri" id="btnDiagnose">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9.5 14.5-5 5M5 12a7 7 0 1 1 3.6 6.1"/><path d="m14.5 3.5 6 6M14 14.5l6-6"/></svg>
+            诊断并纠正
+          </button>
+          <button class="btn btn-line" id="btnClearSent">清空</button>
+        </div>
+        <div class="chips" style="margin-top:12px">
+          <span class="note" style="margin:0;align-self:center">示例：</span>
+          <button class="chip" data-sample="i have a apple">i have a apple</button>
+          <button class="chip" data-sample="he go to school yesterday">he go to school yesterday</button>
+          <button class="chip" data-sample="she like 苹果">she like 苹果</button>
+          <button class="chip" data-sample="i very like play basketball">i very like play basketball</button>
+          <button class="chip" data-sample="there is two cat on the table">there is two cat on the table</button>
+          <button class="chip" data-sample="he don't like 咖啡">he don't like 咖啡</button>
+          <button class="chip" data-sample="can you helps me">can you helps me</button>
+        </div>
+      </div>
+
+      <div class="card result" id="resultCard">
+        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4L4.2 8.7l5.4-.8z"/></svg>诊断报告</h2>
+        <div class="score-wrap">
+          <div class="score-ring" id="scoreRing"><div class="in"><span class="num" id="scoreNum">0</span><span class="cap">分</span></div></div>
+          <div class="score-info">
+            <div class="grade" id="gradeText"></div>
+            <div class="desc" id="scoreDesc"></div>
+          </div>
+        </div>
+        <div class="sent">
+          <div class="lab">原句</div>
+          <div class="txt" id="origSent"></div>
+        </div>
+        <div class="sent">
+          <div class="lab">纠正后（红色为需修改处）</div>
+          <div class="txt" id="fixSent"></div>
+        </div>
+        <div id="issueList"></div>
+        <div style="display:flex;gap:10px;margin-top:14px">
+          <button class="btn btn-pri" id="btnSpeak">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>
+            朗读纠正句
+          </button>
+          <button class="btn btn-ghost" id="btnSaveRec">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>
+            保存记录
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 词汇本 ============ -->
+    <section class="tab-page" id="pageVocab">
+      <div class="card">
+        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15.5H6.5A2.5 2.5 0 0 0 4 21z"/><path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H20"/></svg>我的单词</h2>
+        <div id="vocabList"></div>
+        <div style="display:flex;gap:10px;margin-top:12px">
+          <button class="btn btn-line" id="btnClearVocab">清空单词</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>练习记录</h2>
+        <div id="histList"></div>
+        <div style="display:flex;gap:10px;margin-top:12px">
+          <button class="btn btn-line" id="btnClearHist">清空记录</button>
+        </div>
+      </div>
+      <div class="foot-tip">口语帮手 · 本地优先，数据保存在本机浏览器<br>支持拍照识词 / 语音纠错 / 词汇复习</div>
+    </section>
+  </main>
+</div>
+
+<nav class="tabbar"><div class="tabbar-in">
+  <button class="tab on" data-tab="pageImage">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h2.5L8 5.5h8L17.5 8H20a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 20 20H4a1.5 1.5 0 0 1-1.5-1.5v-9A1.5 1.5 0 0 1 4 8z"/><circle cx="12" cy="13.5" r="3.5"/></svg>
+    看图识词
+  </button>
+  <button class="tab" data-tab="pageSpeak">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+    口语纠错
+  </button>
+  <button class="tab" data-tab="pageVocab">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15.5H6.5A2.5 2.5 0 0 0 4 21z"/><path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H20"/></svg>
+    词汇本
+  </button>
+</div></nav>
+
+<div class="toast" id="toast"></div>
+
+<div class="mask" id="mask">
+  <div class="sheet">
+    <h3>使用说明</h3>
+    <ul>
+      <li><b>看图识词：</b>点击“拍照识别”或“上传图片”，应用会自动框出图中物品并给出英文单词与中文释义，可点喇叭听发音、点收藏加入词汇本。</li>
+      <li><b>口语纠错：</b>点击麦克风说出英文句子（可夹杂中文），或直接在文本框输入；点“诊断并纠正”会逐条指出错误并给出纠正后的句子，还能朗读。</li>
+      <li><b>安装到手机：</b>在手机浏览器打开后，用浏览器菜单“添加到主屏幕”，即可像 App 一样全屏使用（安卓 / iPhone 都支持）。</li>
+      <li><b>语音识别要求：</b>需要 Chrome / Edge 浏览器，并通过 https 或电脑 localhost 打开；直接打开本地文件时语音不可用，但拍照识词和打字纠错不受影响。</li>
+      <li><b>首次识别：</b>识别模型约 8MB，首次使用需要联网加载，之后浏览器会缓存。</li>
+      <li><b>隐私：</b>照片和语音只在你的设备本地处理，不会上传任何服务器。</li>
+    </ul>
+    <div style="margin-top:14px"><button class="btn btn-pri" id="btnCloseHelp">知道了</button></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ============================================================
+   工具函数
+============================================================ */
+const $ = id => document.getElementById(id);
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+let toastTimer = null;
+function toast(msg){
+  const t = $("toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=> t.classList.remove("show"), 2600);
+}
+function fmtTime(ts){
+  const d = new Date(ts), p = n => (n<10?"0":"")+n;
+  return `${d.getMonth()+1}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function speak(text, lang){
+  if(!("speechSynthesis" in window)){ toast("当前浏览器不支持朗读"); return; }
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = lang || "en-US"; u.rate = 0.9;
+  speechSynthesis.cancel(); speechSynthesis.speak(u);
+}
+function escapeHtml(s){
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+/* ============================================================
+   Tab 切换
+============================================================ */
+document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", ()=>{
+  document.querySelectorAll(".tab").forEach(x => x.classList.remove("on"));
+  document.querySelectorAll(".tab-page").forEach(x => x.classList.remove("on"));
+  t.classList.add("on");
+  $(t.dataset.tab).classList.add("on");
+}));
+
+$("btnHelp").addEventListener("click", ()=> $("mask").classList.add("show"));
+$("btnCloseHelp").addEventListener("click", ()=> $("mask").classList.remove("show"));
+$("mask").addEventListener("click", e => { if(e.target === $("mask")) $("mask").classList.remove("show"); });
+
+/* ============================================================
+   看图识词：TFJS + COCO-SSD
+============================================================ */
+const COCO_ZH = {
+  person:"人", bicycle:"自行车", car:"汽车", motorcycle:"摩托车", airplane:"飞机", bus:"公交车",
+  train:"火车", truck:"卡车", boat:"船", "traffic light":"红绿灯", "fire hydrant":"消防栓",
+  "stop sign":"停止标志", "parking meter":"停车计时器", bench:"长椅", bird:"鸟", cat:"猫",
+  dog:"狗", horse:"马", sheep:"绵羊", cow:"牛", elephant:"大象", bear:"熊", zebra:"斑马",
+  giraffe:"长颈鹿", backpack:"背包", umbrella:"雨伞", handbag:"手提包", tie:"领带",
+  suitcase:"行李箱", frisbee:"飞盘", skis:"滑雪板", snowboard:"单板滑雪板", "sports ball":"运动球",
+  kite:"风筝", "baseball bat":"棒球棒", "baseball glove":"棒球手套", skateboard:"滑板",
+  surfboard:"冲浪板", "tennis racket":"网球拍", bottle:"瓶子", "wine glass":"红酒杯",
+  cup:"杯子", fork:"叉子", knife:"刀", spoon:"勺子", bowl:"碗", banana:"香蕉", apple:"苹果",
+  sandwich:"三明治", orange:"橙子", broccoli:"西兰花", carrot:"胡萝卜", "hot dog":"热狗",
+  pizza:"披萨", donut:"甜甜圈", cake:"蛋糕", chair:"椅子", couch:"沙发", "potted plant":"盆栽植物",
+  bed:"床", "dining table":"餐桌", toilet:"马桶", tv:"电视", laptop:"笔记本电脑", mouse:"鼠标",
+  remote:"遥控器", keyboard:"键盘", "cell phone":"手机", microwave:"微波炉", oven:"烤箱",
+  toaster:"烤面包机", sink:"水槽", refrigerator:"冰箱", book:"书", clock:"钟", vase:"花瓶",
+  scissors:"剪刀", "teddy bear":"泰迪熊", "hair drier":"吹风机", toothbrush:"牙刷"
+};
+let model = null, modelLoading = false;
+
+function loadScript(src){
+  return new Promise((res, rej) => {
+    const s = document.createElement("script");
+    s.src = src; s.onload = res;
+    s.onerror = () => { s.remove(); rej(new Error("load fail: " + src)); };
+    document.head.appendChild(s);
+  });
+}
+async function loadLibs(){
+  if (window.tf && window.cocoSsd) return;
+  const TF = ["https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js",
+              "https://registry.npmmirror.com/@tensorflow/tfjs/4.22.0/files/dist/tf.min.js",
+              "https://unpkg.com/@tensorflow/tfjs@4.22.0/dist/tf.min.js"];
+  const COCO = ["https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js",
+                "https://registry.npmmirror.com/@tensorflow-models/coco-ssd/2.2.3/files/dist/coco-ssd.min.js",
+                "https://unpkg.com/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"];
+  if (!window.tf) for (const u of TF){ try{ await loadScript(u); break; }catch(e){} }
+  if (!window.cocoSsd) for (const u of COCO){ try{ await loadScript(u); break; }catch(e){} }
+  if (!window.tf || !window.cocoSsd) throw new Error("无法加载识别库，请检查网络");
+}
+async function ensureModel(){
+  if (model) return true;
+  if (modelLoading){ toast("模型正在加载，请稍候…"); return false; }
+  modelLoading = true;
+  setImgStatus("正在加载识别模型（约 8MB，首次需联网）…", true);
+  try{
+    await loadLibs();
+    model = await cocoSsd.load({ base: "lite_mobilenet_v2" });
+    setImgStatus("模型已就绪，可以开始识别");
+    return true;
+  }catch(e){
+    setImgStatus("模型加载失败：请检查网络后重试，或先使用手动添加单词");
+    return false;
+  }finally{
+    modelLoading = false;
+  }
+}
+function setImgStatus(txt, loading){
+  const el = $("imgStatus");
+  el.innerHTML = loading ? `<span class="spin"></span>${escapeHtml(txt)}` : escapeHtml(txt);
+}
+function pickImage(file){
+  if (!file || !/^image\//.test(file.type)){ toast("请选择图片文件"); return; }
+  const url = URL.createObjectURL(file);
+  const img = $("imgEl");
+  img.onload = () => { $("imgBox").classList.add("show"); $("imgPh").style.display = "none"; runDetect(); };
+  img.src = url;
+}
+$("btnCamera").addEventListener("click", ()=> $("cameraInput").click());
+$("btnUpload").addEventListener("click", ()=> $("uploadInput").click());
+$("cameraInput").addEventListener("change", e => pickImage(e.target.files[0]));
+$("uploadInput").addEventListener("change", e => pickImage(e.target.files[0]));
+
+async function runDetect(){
+  const img = $("imgEl");
+  if (!img.src || !img.naturalWidth) return;
+  const ok = await ensureModel();
+  if (!ok) return;
+  setImgStatus("正在识别图片…", true);
+  try{
+    const preds = await model.detect(img, 8);
+    drawBoxes(img, preds);
+    renderWords(preds);
+    setImgStatus(`识别完成，共 ${preds.length} 个物品` + (preds.length ? "（点击喇叭听发音）" : ""));
+  }catch(e){
+    setImgStatus("识别出错，请换一张更清晰的图片重试");
+  }
+}
+function drawBoxes(img, preds){
+  const cv = $("cvEl");
+  cv.width = img.naturalWidth; cv.height = img.naturalHeight;
+  const ctx = cv.getContext("2d");
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  const fs = Math.max(18, Math.round(cv.height * 0.028));
+  preds.forEach(p => {
+    const [x, y, w, h] = p.bbox;
+    ctx.strokeStyle = "#5b5bf0"; ctx.lineWidth = Math.max(2, cv.width * 0.004);
+    ctx.strokeRect(x, y, w, h);
+    ctx.fillStyle = "#5b5bf0";
+    const ty = y > fs + 6 ? y - fs - 6 : y + 4;
+    ctx.font = `600 ${fs}px -apple-system, sans-serif`;
+    ctx.fillText(`${p.class} ${Math.round(p.score * 100)}%`, x, ty);
+  });
+}
+function renderWords(preds){
+  const g = $("wordGrid"); g.innerHTML = "";
+  preds.filter(p => p.score >= 0.35).forEach(p => {
+    const cls = p.class, zh = COCO_ZH[cls] || "";
+    const d = document.createElement("div");
+    d.className = "wcard";
+    d.innerHTML = `
+      <div class="en">${escapeHtml(cls)}</div>
+      <div class="zh">${escapeHtml(zh || "—")}</div>
+      <div class="meta">可信度 ${Math.round(p.score * 100)}%</div>
+      <div class="btns">
+        <button class="mini" data-act="speak" data-w="${escapeHtml(cls)}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z"/><path d="M15.5 9a4 4 0 0 1 0 6"/></svg>发音</button>
+        <button class="mini solid" data-act="save" data-w="${escapeHtml(cls)}" data-z="${escapeHtml(zh)}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>收藏</button>
+      </div>`;
+    d.querySelector('[data-act="speak"]').addEventListener("click", ()=> speak(cls));
+    d.querySelector('[data-act="save"]').addEventListener("click", ()=>{
+      const w = d.querySelector('[data-act="save"]').dataset.w;
+      const z = d.querySelector('[data-act="save"]').dataset.z;
+      addVocab({ en: w, zh: z });
+    });
+    g.appendChild(d);
+  });
+  if (!g.children.length) g.innerHTML = `<div class="empty">没有识别到明显物品<br>试试更清晰、物品居中的照片</div>`;
+}
+
+/* ============================================================
+   词汇本 & 记录存储
+============================================================ */
+function getVocab(){ return store.get("sp_vocab", []); }
+function addVocab({en, zh}){
+  if (!en) return;
+  en = en.trim(); zh = (zh || "").trim();
+  const list = getVocab();
+  if (list.some(v => v.en.toLowerCase() === en.toLowerCase())){
+    toast("词汇本里已经有这个词了"); renderVocab(); return;
+  }
+  list.unshift({ en, zh, t: Date.now() });
+  store.set("sp_vocab", list.slice(0, 200));
+  renderVocab();
+  toast(`已收藏：${en}`);
+}
+function removeVocab(i){
+  const list = getVocab(); list.splice(i, 1); store.set("sp_vocab", list); renderVocab();
+}
+function renderVocab(){
+  const list = getVocab(), el = $("vocabList");
+  if (!list.length){ el.innerHTML = `<div class="empty">还没有收藏单词<br>去“看图识词”拍张照试试吧</div>`; return; }
+  el.innerHTML = "";
+  list.forEach((v, i) => {
+    const d = document.createElement("div");
+    d.className = "vitem";
+    d.innerHTML = `
+      <div style="min-width:0">
+        <div class="en">${escapeHtml(v.en)}</div>
+        <div class="zh">${escapeHtml(v.zh || "")}</div>
+        <div class="tm">${fmtTime(v.t)}</div>
+      </div>
+      <div class="ops">
+        <button class="mini" data-a="s">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z"/><path d="M15.5 9a4 4 0 0 1 0 6"/></svg>朗读</button>
+        <button class="mini" data-a="d">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M9 7V5h6v2M8 7l1 12h6l1-12"/></svg>删除</button>
+      </div>`;
+    d.querySelector('[data-a="s"]').addEventListener("click", ()=> speak(v.en));
+    d.querySelector('[data-a="d"]').addEventListener("click", ()=> removeVocab(i));
+    el.appendChild(d);
+  });
+}
+function getHist(){ return store.get("sp_history", []); }
+function saveHist(rec){
+  const list = getHist();
+  list.unshift(rec);
+  store.set("sp_history", list.slice(0, 50));
+  renderHist();
+}
+function removeHist(i){
+  const list = getHist(); list.splice(i, 1); store.set("sp_history", list); renderHist();
+}
+function renderHist(){
+  const list = getHist(), el = $("histList");
+  if (!list.length){ el.innerHTML = `<div class="empty">还没有练习记录</div>`; return; }
+  el.innerHTML = "";
+  list.forEach((h, i) => {
+    const d = document.createElement("div");
+    d.className = "hitem";
+    const issueTxt = (h.issues || []).map(x => `${x.suggest ? x.original + " → " + x.suggest : x.original}`).join("；") || "无";
+    d.innerHTML = `
+      <div class="cs">${escapeHtml(h.corrected)}</div>
+      <div class="meta"><span class="sc">${h.score} 分</span><span>${h.issueCount || 0} 处问题</span><span>${fmtTime(h.t)}</span></div>
+      <div class="det"><b>原句：</b>${escapeHtml(h.original)}<br><b>要点：</b>${escapeHtml(issueTxt)}</div>`;
+    d.addEventListener("click", ()=> d.classList.toggle("open"));
+    el.appendChild(d);
+  });
+}
+$("btnClearVocab").addEventListener("click", ()=>{
+  if (!getVocab().length) return;
+  if (confirm("确定清空所有单词吗？")){ store.set("sp_vocab", []); renderVocab(); toast("已清空"); }
+});
+$("btnClearHist").addEventListener("click", ()=>{
+  if (!getHist().length) return;
+  if (confirm("确定清空所有练习记录吗？")){ store.set("sp_history", []); renderHist(); toast("已清空"); }
+});
+$("btnAddWord").addEventListener("click", ()=>{
+  const inp = $("manualWord"), raw = inp.value.trim();
+  if (!raw){ toast("请输入单词"); return; }
+  const parts = raw.split(/\s+/);
+  const en = parts[0], zh = parts.slice(1).join(" ");
+  addVocab({ en, zh }); inp.value = "";
+});
+$("manualWord").addEventListener("keydown", e => { if (e.key === "Enter") $("btnAddWord").click(); });
+
+/* ============================================================
+   语音输入（Web Speech API）
+============================================================ */
+let rec = null, recOn = false, recFinal = "", recMode = "en", recTimer = null;
+$("modeChips").addEventListener("click", e => {
+  const c = e.target.closest(".chip"); if (!c) return;
+  document.querySelectorAll("#modeChips .chip").forEach(x => x.classList.remove("on"));
+  c.classList.add("on");
+  recMode = c.dataset.mode;
+});
+function stopRec(){
+  if (rec){ try{ rec.stop(); }catch(e){} }
+}
+function finalizeRec(){
+  recOn = false; clearTimeout(recTimer);
+  $("btnMic").classList.remove("listening");
+  $("micTip").textContent = "点击开始说话";
+  $("liveText").textContent = "";
+  const txt = recFinal.trim();
+  if (txt){
+    const ta = $("sentence");
+    ta.value = ta.value.trim() ? ta.value.trimEnd() + " " + txt : txt;
+    toast("识别完成，可编辑后诊断");
+  }
+  recFinal = "";
+}
+function startRec(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR){ toast("当前浏览器不支持语音识别，请用 Chrome / Edge，并通过 https 打开"); return; }
+  rec = new SR();
+  rec.lang = recMode === "en" ? "en-US" : "zh-CN";
+  rec.continuous = true; rec.interimResults = true;
+  rec.onstart = () => {
+    recOn = true;
+    $("btnMic").classList.add("listening");
+    $("micTip").textContent = "正在聆听，点击停止";
+    recTimer = setTimeout(stopRec, 45000);
+  };
+  rec.onresult = e => {
+    let interim = "";
+    for (let i = e.resultIndex; i < e.results.length; i++){
+      const r = e.results[i];
+      if (r.isFinal) recFinal += r[0].transcript; else interim += r[0].transcript;
+    }
+    $("liveText").textContent = (recFinal + interim).trim();
+  };
+  rec.onerror = e => {
+    if (e.error === "not-allowed" || e.error === "service-not-allowed"){
+      toast("麦克风权限被拒绝，请在浏览器设置中允许");
+    } else if (e.error === "no-speech"){
+      toast("没有听到声音，请靠近麦克风再说一次");
+    }
+    finalizeRec();
+  };
+  rec.onend = () => { if (recOn) finalizeRec(); };
+  try{ rec.start(); }catch(e){ toast("语音启动失败，请重试"); }
+}
+$("btnMic").addEventListener("click", ()=> { recOn ? stopRec() : startRec(); });
+function stopRec2(){
+  if (recOn) stopRec();
+  if (rec){ rec = null; }
+}
+
+/* ============================================================
+   语法诊断引擎（规则版，AI 接口预留）
+============================================================ */
+/* ---- AI 纠错接口预留 ----
+   如需接入大模型纠错：把 aiCorrect() 改成调用你的后端或 AI 服务，
+   返回 { corrected, issues:[{original,suggest,detail}] } 即可自动替换
+   下面的规则引擎。未配置时返回 null，走内置规则引擎，无需任何 Key。 */
+async function aiCorrect(text){ return null; }
+
+const VERBS = ("be have do go get make take come see know think want need like love play eat drink buy sell pay give put find lose keep hold show tell ask answer say speak talk listen hear read write learn study teach work run walk sit stand sleep wake start stop finish try help open close wait call visit meet feel hope wish believe understand remember forget choose decide change continue practice use watch look wash clean cook wear carry bring send build drive ride fly swim jump sing dance draw paint kick throw catch break fix cut pick share win spend cost hit set let become begin grow fall steal fight shoot shake sink ring rise shut").split(" ");
+const VERB_SET = new Set(VERBS);
+const MODALS = new Set("can will would should could may might must shall can't won't shouldn't couldn't wouldn't mustn't".split(" "));
+const IRREG = { go:"went", have:"had", do:"did", get:"got", make:"made", take:"took", come:"came", see:"saw",
+  know:"knew", think:"thought", buy:"bought", bring:"brought", catch:"caught", teach:"taught", build:"built",
+  send:"sent", spend:"spent", pay:"paid", sell:"sold", tell:"told", say:"said", give:"gave", find:"found",
+  feel:"felt", leave:"left", sleep:"slept", keep:"kept", meet:"met", read:"read", write:"wrote", speak:"spoke",
+  drive:"drove", ride:"rode", fly:"flew", swim:"swam", sing:"sang", sit:"sat", stand:"stood", win:"won",
+  lose:"lost", understand:"understood", begin:"began", become:"became", break:"broke", choose:"chose",
+  cut:"cut", hit:"hit", cost:"cost", put:"put", set:"set", let:"let", wear:"wore", run:"ran", drink:"drank",
+  eat:"ate", wake:"woke", hear:"heard", hold:"held", throw:"threw", draw:"drew", forget:"forgot", grow:"grew",
+  fall:"fell", steal:"stole", fight:"fought", shoot:"shot", shake:"shook", sink:"sank", ring:"rang",
+  rise:"rose", shut:"shut" };
+const IRREG_REV = {}; for (const k in IRREG) IRREG_REV[IRREG[k]] = k;
+const DOUBLE = new Set("stop plan drop shop chat rob wrap clap scan beg nod rub hug jog pad pat rot slam step stir".split(" "));
+function thirdOf(stem){
+  if (stem === "have") return "has";
+  if (stem === "do") return "does";
+  if (stem === "go") return "goes";
+  if (/[sxz]$/.test(stem) || /(ch|sh|o)$/.test(stem)) return stem + "es";
+  if (/[^aeiou]y$/.test(stem)) return stem.slice(0, -1) + "ies";
+  return stem + "s";
+}
+function pastOf(stem){
+  if (IRREG[stem]) return IRREG[stem];
+  if (/e$/.test(stem)) return stem + "d";
+  if (/[^aeiou]y$/.test(stem)) return stem.slice(0, -1) + "ied";
+  if (DOUBLE.has(stem)) return stem + stem[stem.length - 1] + "ed";
+  return stem + "ed";
+}
+function stemOf(w){
+  if (w === "has") return "have";
+  if (w === "does") return "do";
+  if (w === "goes") return "go";
+  if (VERB_SET.has(w)) return w;
+  if (IRREG_REV[w]) return IRREG_REV[w];
+  if (w.endsWith("ing")){
+    let s = w.slice(0, -3);
+    if (VERB_SET.has(s)) return s;
+    if (VERB_SET.has(s + "e")) return s + "e";
+    if (s.length > 1 && s.endsWith(s[s.length-1]) && VERB_SET.has(s.slice(0, -1))) return s.slice(0, -1);
+    return null;
+  }
+  if (w.endsWith("ed")){
+    let s = w.slice(0, -2);
+    if (VERB_SET.has(s)) return s;
+    if (VERB_SET.has(s + "e")) return s + "e";
+    if (s.length > 1 && s.endsWith(s[s.length-1]) && VERB_SET.has(s.slice(0, -1))) return s.slice(0, -1);
+    return null;
+  }
+  if (w.endsWith("es")){
+    let s = w.slice(0, -2);
+    if (VERB_SET.has(s)) return s;
+    return null;
+  }
+  if (w.endsWith("s") && !w.endsWith("ss")){
+    let s = w.slice(0, -1);
+    if (VERB_SET.has(s)) return s;
+    return null;
+  }
+  return null;
+}
+const PLURALS = { child:"children", man:"men", woman:"women", foot:"feet", tooth:"teeth", person:"people",
+  mouse:"mice", fish:"fish", sheep:"sheep", goose:"geese", leaf:"leaves", knife:"knives", wife:"wives",
+  life:"lives", box:"boxes", bus:"buses", watch:"watches", dish:"dishes", brush:"brushes",
+  sandwich:"sandwiches", potato:"potatoes", tomato:"tomatoes", hero:"heroes" };
+function pluralOf(n){
+  if (PLURALS[n]) return PLURALS[n];
+  if (/[sxz]$/.test(n) || /(ch|sh)$/.test(n)) return n + "es";
+  if (/[^aeiou]y$/.test(n)) return n.slice(0, -1) + "ies";
+  return n + "s";
+}
+const COUNT_NOUNS = new Set("apple banana orange grape strawberry watermelon peach pear lemon tomato potato carrot onion cucumber egg cake cookie donut pizza hamburger sandwich hotdog book pen pencil phone cellphone computer laptop tablet keyboard mouse chair table desk bed lamp cup glass bottle plate bowl fork knife spoon bag backpack wallet key watch hat cap shoe sock shirt jacket coat dress skirt glove umbrella car bus train plane airplane bike bicycle motorcycle truck boat ship ball kite doll toy gift present box door window room house school teacher student friend dog cat bird fish horse cow pig sheep tiger elephant monkey rabbit panda flower tree mountain river city town village country picture photo map ticket letter song movie game coin dollar star cloud sun moon leaf bench couch toilet tv remote microwave oven toaster sink refrigerator clock vase scissors toothbrush".split(" "));
+const A_EXC = new Set("hour honest heir honor".split(" "));
+const AN_EXC = new Set("university uniform unit user european one once useful euro".split(" "));
+const SPELLING = { recieve:"receive", definately:"definitely", becuase:"because", teh:"the", wich:"which",
+  thier:"their", wierd:"weird", alot:"a lot", seperate:"separate", occured:"occurred", embarass:"embarrass",
+  neccessary:"necessary", accomodate:"accommodate", adress:"address", arguement:"argument", calender:"calendar",
+  comming:"coming", enviroment:"environment", experiance:"experience", freind:"friend", goverment:"government",
+  happend:"happened", immediatly:"immediately", inteligent:"intelligent", intresting:"interesting",
+  knowlege:"knowledge", lenght:"length", oppurtunity:"opportunity", peice:"piece", prefered:"preferred",
+  recomend:"recommend", refered:"referred", relevent:"relevant", remeber:"remember", restraunt:"restaurant",
+  sucess:"success", tommorow:"tomorrow", truely:"truly", unfortunatly:"unfortunately", untill:"until",
+  useing:"using", bussiness:"business", collegue:"colleague", dicision:"decision", dissapear:"disappear",
+  embarassing:"embarrassing", enought:"enough", eqipment:"equipment", exersise:"exercise", famouse:"famous",
+  finaly:"finally", foriegn:"foreign", fourty:"forty", foward:"forward", grammer:"grammar", hapiness:"happiness",
+  heared:"heard", independant:"independent", intrest:"interest", libary:"library", managment:"management",
+  midle:"middle", mony:"money", noticable:"noticeable", nowdays:"nowadays", offical:"official", oppinion:"opinion",
+  oppsite:"opposite", orginized:"organized", palce:"place", payed:"paid", peaple:"people", persue:"pursue",
+  possable:"possible", probaly:"probably", quetion:"question", realy:"really", reconize:"recognize",
+  rediculous:"ridiculous", refering:"referring", religous:"religious", reveiw:"review", resturant:"restaurant",
+  shcool:"school", shedule:"schedule", shoose:"choose", shoud:"should", shoudl:"should", similiar:"similar",
+  sincerly:"sincerely", somtimes:"sometimes", specificly:"specifically", speach:"speech", speling:"spelling",
+  sucessful:"successful", temprature:"temperature", thn:"then", throught:"through", timne:"time",
+  tradgedy:"tragedy", ture:"true", twelth:"twelfth", unbeleivable:"unbelievable", understnad:"understand",
+  univeristy:"university", usally:"usually", vaccum:"vacuum", vegtable:"vegetable", woud:"would",
+  writen:"written", yesturday:"yesterday" };
+const CN_DICT = {
+  苹果:"apple", 香蕉:"banana", 橙子:"orange", 橘子:"orange", 水:"water", 茶:"tea", 咖啡:"coffee",
+  米饭:"rice", 面包:"bread", 鸡蛋:"egg", 牛奶:"milk", 肉:"meat", 鱼:"fish", 鸡:"chicken",
+  蔬菜:"vegetable", 水果:"fruit", 蛋糕:"cake", 披萨:"pizza", 汉堡:"hamburger", 面条:"noodle",
+  饺子:"dumpling", 糖:"sugar", 盐:"salt", 汤:"soup", 沙拉:"salad", 早餐:"breakfast", 午餐:"lunch",
+  晚餐:"dinner", 食物:"food", 零食:"snack", 饼干:"cookie", 巧克力:"chocolate", 冰淇淋:"ice cream",
+  果汁:"juice", 啤酒:"beer", 红酒:"wine", 葡萄:"grape", 草莓:"strawberry", 西瓜:"watermelon",
+  桃子:"peach", 梨:"pear", 柠檬:"lemon", 番茄:"tomato", 土豆:"potato", 胡萝卜:"carrot", 洋葱:"onion",
+  黄瓜:"cucumber", 玉米:"corn", 豆腐:"tofu", 手机:"phone", 电脑:"computer", 笔记本电脑:"laptop",
+  书:"book", 笔:"pen", 铅笔:"pencil", 桌子:"table", 椅子:"chair", 床:"bed", 窗户:"window", 门:"door",
+  房间:"room", 房子:"house", 家:"home", 学校:"school", 老师:"teacher", 学生:"student", 朋友:"friend",
+  家人:"family", 爸爸:"father", 妈妈:"mother", 哥哥:"brother", 姐姐:"sister", 孩子:"child",
+  车:"car", 公交车:"bus", 火车:"train", 飞机:"plane", 自行车:"bike", 出租车:"taxi", 地铁:"subway",
+  包:"bag", 背包:"backpack", 钱包:"wallet", 钥匙:"key", 眼镜:"glasses", 手表:"watch", 衣服:"clothes",
+  鞋子:"shoe", 帽子:"hat", 伞:"umbrella", 钱:"money", 票:"ticket", 地图:"map", 照片:"photo",
+  图片:"picture", 视频:"video", 音乐:"music", 电影:"movie", 游戏:"game", 电视:"tv", 冰箱:"fridge",
+  灯:"light", 去:"go", 来:"come", 吃:"eat", 喝:"drink", 买:"buy", 卖:"sell", 看:"see", 听:"listen",
+  说:"say", 读:"read", 写:"write", 学习:"study", 工作:"work", 玩:"play", 喜欢:"like", 爱:"love",
+  想要:"want", 需要:"need", 有:"have", 做:"do", 帮助:"help", 知道:"know", 想:"think", 感觉:"feel",
+  走:"walk", 跑:"run", 开车:"drive", 唱歌:"sing", 跳舞:"dance", 游泳:"swim", 睡觉:"sleep",
+  起床:"wake up", 开始:"start", 结束:"finish", 完成:"finish", 见面:"meet", 拜访:"visit", 打电话:"call",
+  发送:"send", 收到:"receive", 打开:"open", 关闭:"close", 等待:"wait", 找到:"find", 丢失:"lose",
+  忘记:"forget", 记得:"remember", 问:"ask", 回答:"answer", 说话:"talk", 告诉:"tell", 给:"give",
+  拿:"take", 放:"put", 坐:"sit", 站:"stand", 穿:"wear", 洗:"wash", 做饭:"cook", 打扫:"clean",
+  修理:"fix", 练习:"practice", 尝试:"try", 停止:"stop", 继续:"continue", 改变:"change", 选择:"choose",
+  决定:"decide", 希望:"hope", 相信:"believe", 理解:"understand", 学习:"learn", 今天:"today",
+  明天:"tomorrow", 昨天:"yesterday", 现在:"now", 早上:"morning", 下午:"afternoon", 晚上:"evening",
+  中午:"noon", 我:"I", 你:"you", 他:"he", 她:"she", 我们:"we", 他们:"they", 我的:"my", 你的:"your",
+  他的:"his", 她的:"her", 我们的:"our", 他们的:"their", 什么:"what", 为什么:"why", 怎么:"how",
+  哪里:"where", 谁:"who", 什么时候:"when", 是:"is", 不是:"not", 也:"also", 但是:"but", 因为:"because",
+  所以:"so", 和:"and", 或者:"or", 如果:"if", 非常:"very", 真的:"really", 好:"good", 不好:"bad",
+  大:"big", 小:"small", 新的:"new", 旧的:"old", 快:"fast", 慢:"slow", 美丽:"beautiful",
+  漂亮:"pretty", 高兴:"happy", 难过:"sad", 累:"tired", 忙:"busy", 容易:"easy", 困难:"difficult",
+  便宜:"cheap", 贵:"expensive", 热:"hot", 冷:"cold", 甜:"sweet", 辣:"spicy", 咸:"salty",
+  无聊:"boring", 有趣:"interesting", 天气:"weather", 雨:"rain", 太阳:"sun", 月亮:"moon", 星星:"star",
+  天空:"sky", 云:"cloud", 风:"wind", 雪:"snow", 山:"mountain", 河:"river", 海:"sea", 树:"tree",
+  花:"flower", 草:"grass", 动物:"animal", 猫:"cat", 狗:"dog", 鸟:"bird", 马:"horse", 牛:"cow",
+  猪:"pig", 羊:"sheep", 老虎:"tiger", 大象:"elephant", 猴子:"monkey", 兔子:"rabbit", 老鼠:"mouse",
+  熊猫:"panda", 公园:"park", 超市:"supermarket", 商店:"shop", 餐厅:"restaurant", 医院:"hospital",
+  机场:"airport", 车站:"station", 酒店:"hotel", 图书馆:"library", 电影院:"cinema", 银行:"bank",
+  办公室:"office", 公司:"company", 周末:"weekend", 假期:"holiday", 生日:"birthday", 礼物:"gift"
+};
+function cnLookupTable(){
+  const m = Object.assign({}, CN_DICT);
+  getVocab().forEach(v => { if (v.zh) m[v.zh] = v.en; });
+  return m;
+}
+function segmentCn(text){
+  const m = cnLookupTable();
+  const keys = Object.keys(m);
+  const res = []; let i = 0;
+  while (i < text.length){
+    let best = null;
+    for (const k of keys){
+      if (k.length && text.startsWith(k, i) && (!best || k.length > best.length)) best = k;
+    }
+    if (best){ res.push({ cn: best, en: m[best] }); i += best.length; }
+    else { res.push({ cn: text[i], en: null }); i += 1; }
+  }
+  return res;
+}
+
+function diagnose(text){
+  const s = text.trim();
+  if (!s) return { original:"", corrected:"", score:0, issues:[] };
+  const lower = s.toLowerCase();
+  const edits = [];
+  const issues = [];
+  const seen = new Set();
+
+  function addEdit(edit, issue){
+    if (edit && edits.some(e => !(e.end <= edit.start || edit.end <= e.start))) return;
+    if (edit) edits.push(edit);
+    if (issue){
+      const key = issue.label + "|" + issue.original + "|" + issue.suggest;
+      if (!seen.has(key)){ seen.add(key); issues.push(issue); }
+    }
+  }
+
+  /* 1. 中文词检测 */
+  for (const m of s.matchAll(/[\u4e00-\u9fff]+/g)){
+    const seg = segmentCn(m[0]);
+    let repl = "";
+    seg.forEach(g => {
+      if (g.en){
+        repl += g.en + " ";
+        addEdit(null, { type:"cn", sev:15, label:"中文词", original:g.cn, suggest:g.en,
+          detail:`"${g.cn}" 对应的英文是 "${g.en}"，请用英文表达。` });
+      } else {
+        repl += "____ ";
+        addEdit(null, { type:"cn", sev:15, label:"中文词", original:g.cn, suggest:"？",
+          detail:`检测到中文 "${g.cn}"（词典暂未收录），请输入对应的英文单词。` });
+      }
+    });
+    addEdit({ start:m.index, end:m.index + m[0].length, text:repl.trimEnd() }, null);
+  }
+
+  /* 2. be 动词搭配 */
+  for (const m of lower.matchAll(/\b(i|you|we|they|he|she|it)\s+(is|are|am)\b/g)){
+    const subj = m[1], be = m[2]; let fix = null;
+    if (subj === "i" && be !== "am") fix = "am";
+    else if (subj === "you" && be === "is") fix = "are";
+    else if ((subj === "we" || subj === "they") && be === "is") fix = "are";
+    else if (subj === "he" && be === "am") fix = "is";
+    else if ((subj === "he" || subj === "she" || subj === "it") && be === "are") fix = "is";
+    if (fix){
+      addEdit({ start:m.index + m[1].length + 1, end:m.index + m[0].length, text:fix },
+        { type:"grammar", sev:10, label:"主谓一致", original:`${subj} ${be}`, suggest:`${subj} ${fix}`,
+          detail:`"${subj}" 与 be 动词搭配应为 "${subj} ${fix}"。` });
+    }
+  }
+
+  /* 过去时标记（先于三单规则执行，避免与主谓一致规则冲突） */
+  if (/(yesterday|last\s+\w+|\bago\b|\bin\s+20\d{2}\b)/i.test(lower)){
+    const toks = [];
+    for (const m of lower.matchAll(/\b([a-zA-Z]+)\b/g)){
+      const before = lower.slice(0, m.index).trim().split(/\s+/);
+      const prev = before.pop() || "";
+      const prev2 = before.pop() || "";
+      toks.push({ w:m[1].toLowerCase(), idx:m.index, prev, prev2 });
+    }
+    for (const t of toks){
+      const stem = stemOf(t.w);
+      if (!stem || stem === "be") continue;
+      if (t.prev === "to" || MODALS.has(t.prev) || ["did","do","does","have","has","had"].includes(t.prev) ||
+          ["did","do","does"].includes(t.prev2) || MODALS.has(t.prev2)) continue;
+      if (["is","are","was","were","am","my","your","his","her","our","their","the","a","an","this","that","some","any","no","every"].includes(t.prev)) continue;
+      const after = lower.slice(t.idx + t.w.length).match(/^\s+([a-zA-Z]+)\b/);
+      const nxt = after ? after[1].toLowerCase() : "";
+      if (["is","are","was","were","am"].includes(nxt)) continue;
+      const inflected = t.w === stem || t.w === thirdOf(stem) || t.w === pastOf(stem);
+      if (!inflected) continue;
+      if (t.w === pastOf(stem)) continue;
+      const past = pastOf(stem);
+      addEdit({ start:t.idx, end:t.idx + t.w.length, text:past },
+        { type:"grammar", sev:10, label:"时态", original:t.w, suggest:past,
+          detail:`句中有过去时间（yesterday / last … / ago），动词应改为过去式 "${past}"。` });
+    }
+  }
+
+  /* 3. 第三人称单数 */
+  const SUBJ3 = new Set(["he","she","it","this","that","everyone","everybody","someone","somebody","anyone","nobody"]);
+  for (const m of lower.matchAll(/\b(he|she|it|this|that|everyone|everybody|someone|somebody|anyone|nobody)\s+([a-zA-Z]+)\b/g)){
+    const subj = m[1], w = m[2].toLowerCase();
+    if (!SUBJ3.has(subj)) continue;
+    const prev = lower.slice(0, m.index).trim().split(/\s+/).pop() || "";
+    if (MODALS.has(prev) || prev === "to" || prev === "did" || prev === "do" || prev === "does") continue;
+    if (w === "has" || w === "does" || w === "goes") continue;
+    const stem = stemOf(w);
+    if (!stem || stem === "be") continue;
+    const third = thirdOf(stem);
+    if (third !== w && (w === stem || w === stem + "s" || w === stem + "es")){
+      addEdit({ start:m.index + m[1].length + 1, end:m.index + m[0].length, text:third },
+        { type:"grammar", sev:10, label:"主谓一致", original:w, suggest:third,
+          detail:`"${subj}" 是第三人称单数，动词要用三单形式 "${third}"。` });
+    }
+  }
+
+  /* 第一/二人称后误用三单动词 */
+  for (const m of lower.matchAll(/\b(i|you|we|they)\s+([a-zA-Z]+)\b/g)){
+    const w = m[2].toLowerCase();
+    const stem = stemOf(w);
+    if (!stem || stem === "be") continue;
+    if (w === thirdOf(stem) && w !== stem){
+      addEdit({ start:m.index + m[1].length + 1, end:m.index + m[0].length, text:stem },
+        { type:"grammar", sev:10, label:"主谓一致", original:w, suggest:stem,
+          detail:`"${m[1]}" 后面动词要用原形 "${stem}"，不要加三单 "-s"。` });
+    }
+  }
+
+  /* 4. do/does/did 后接原形 & 助动词一致 */
+  for (const m of lower.matchAll(/\b(do|does|did|don't|doesn't|didn't)\s+([a-zA-Z]+)\b/g)){
+    const aux = m[1], w = m[2].toLowerCase();
+    const stem = stemOf(w);
+    if (stem && w !== stem && stem !== "be"){
+      addEdit({ start:m.index + m[1].length + 1, end:m.index + m[0].length, text:stem },
+        { type:"grammar", sev:10, label:"助动词", original:`${aux} ${w}`, suggest:`${aux} ${stem}`,
+          detail:`"${aux}" 后面要用动词原形 "${stem}"。` });
+    }
+  }
+  for (const m of lower.matchAll(/\b(he|she|it)\s+don't\b/g)){
+    addEdit({ start:m.index + m[1].length + 1, end:m.index + m[0].length, text:"doesn't" },
+      { type:"grammar", sev:10, label:"主谓一致", original:"don't", suggest:"doesn't",
+        detail:`"${m[1]}" 是第三人称单数，否定应为 "doesn't"。` });
+  }
+  for (const m of lower.matchAll(/\b(i|you|we|they)\s+doesn't\b/g)){
+    addEdit({ start:m.index + m[1].length + 1, end:m.index + m[0].length, text:"don't" },
+      { type:"grammar", sev:10, label:"主谓一致", original:"doesn't", suggest:"don't",
+        detail:`"${m[1]}" 用否定助动词 "don't"。` });
+  }
+
+  /* 5. 情态动词后接原形 */
+  for (const m of lower.matchAll(/\b(can|will|would|should|could|may|might|must|shall|can't|won't|shouldn't|couldn't|wouldn't|mustn't)\s+([a-zA-Z]+)\b/g)){
+    const w = m[2].toLowerCase();
+    const stem = stemOf(w);
+    if (stem && w !== stem && stem !== "be"){
+      addEdit({ start:m.index + m[1].length + 1, end:m.index + m[0].length, text:stem },
+        { type:"grammar", sev:10, label:"情态动词", original:`${m[1]} ${w}`, suggest:`${m[1]} ${stem}`,
+          detail:`情态动词 "${m[1]}" 后面接动词原形 "${stem}"。` });
+    }
+  }
+
+  /* 6. to 后接原形 */
+  for (const m of lower.matchAll(/\bto\s+([a-zA-Z]+)\b/g)){
+    const w = m[1].toLowerCase();
+    const stem = stemOf(w);
+    if (stem && w !== stem && stem !== "be"){
+      addEdit({ start:m.index + 3, end:m.index + m[0].length, text:stem },
+        { type:"grammar", sev:10, label:"不定式", original:`to ${w}`, suggest:`to ${stem}`,
+          detail:`"to" 后面接动词原形 "${stem}"。` });
+    }
+  }
+
+  /* 7. 数量词 + 名词复数 */
+  for (const m of lower.matchAll(/\b(two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|many|several|few|both)\s+([a-zA-Z]+)\b/g)){
+    const w = m[2].toLowerCase();
+    if (COUNT_NOUNS.has(w)){
+      const pl = pluralOf(w);
+      addEdit({ start:m.index + m[1].length + 1, end:m.index + m[0].length, text:pl },
+        { type:"grammar", sev:10, label:"名词复数", original:w, suggest:pl,
+          detail:`"${m[1]}" 后接可数名词要用复数形式 "${pl}"。` });
+    }
+  }
+
+  /* 9. a / an */
+  for (const m of lower.matchAll(/\b(a|an)\s+([a-zA-Z]+)\b/g)){
+    const art = m[1], w = m[2].toLowerCase();
+    if (art === "a" && /^[aeiou]/.test(w) && !AN_EXC.has(w) && w.length > 1){
+      addEdit({ start:m.index, end:m.index + 1, text:"an" },
+        { type:"grammar", sev:10, label:"冠词", original:`a ${w}`, suggest:`an ${w}`,
+          detail:`"${w}" 以元音发音开头，冠词用 "an"。` });
+    } else if (art === "an" && !/^[aeiou]/.test(w) && !A_EXC.has(w)){
+      addEdit({ start:m.index, end:m.index + 2, text:"a" },
+        { type:"grammar", sev:10, label:"冠词", original:`an ${w}`, suggest:`a ${w}`,
+          detail:`"${w}" 以辅音发音开头，冠词用 "a"。` });
+    }
+  }
+
+  /* 9. 缺冠词 */
+  for (const m of lower.matchAll(/\b(have|has|buy|buys|bought|need|needs|wanted|want|wants|like|likes|liked|see|saw|eat|eats|ate|take|took|get|got|find|found)\s+([a-zA-Z]+)\b/g)){
+    const w = m[2].toLowerCase();
+    if (COUNT_NOUNS.has(w) && w !== pluralOf(w)){
+      const org = s.slice(m.index + m[1].length + 1, m.index + m[0].length);
+      if (/^[A-Z]/.test(org)) continue;
+      const art = /^[aeiou]/.test(w) && !AN_EXC.has(w) ? "an" : "a";
+      addEdit({ start:m.index + m[1].length + 1, end:m.index + m[1].length + 1, text:art + " " },
+        { type:"grammar", sev:10, label:"缺冠词", original:w, suggest:`${art} ${w}`,
+          detail:`单数可数名词 "${w}" 前面一般要加冠词 "${art}"。` });
+    }
+  }
+
+  /* 10. 动词后接动词原形时缺 to */
+  for (const m of lower.matchAll(/\b(like|love|enjoy|want|need|hate)\s+([a-zA-Z]+)\b/g)){
+    const w = m[2].toLowerCase();
+    if (["help","work"].includes(w)) continue;
+    const stem = stemOf(w);
+    if (stem && w === stem && stem !== "be"){
+      addEdit({ start:m.index + m[1].length + 1, end:m.index + m[1].length + 1, text:"to " },
+        { type:"grammar", sev:10, label:"搭配", original:`${m[1]} ${w}`, suggest:`${m[1]} to ${w}`,
+          detail:`"${m[1]}" 后接另一个动词时，通常用 "${m[1]} to ${w}"。` });
+    }
+  }
+
+  /* 11. 拼写 */
+  for (const m of lower.matchAll(/\b([a-zA-Z]+)\b/g)){
+    const w = m[1].toLowerCase();
+    if (SPELLING[w]){
+      addEdit({ start:m.index, end:m.index + m[0].length, text:SPELLING[w] },
+        { type:"spell", sev:5, label:"拼写", original:w, suggest:SPELLING[w],
+          detail:`"${w}" 拼写有误，正确拼写是 "${SPELLING[w]}"。` });
+    }
+  }
+
+  /* 12. 双重否定 */
+  for (const m of lower.matchAll(/\b(don't|doesn't|didn't|can't|cannot|won't|isn't|aren't|wasn't|weren't|never)\s+(\w+\s+)?(no|nothing|nobody|nowhere)\b/g)){
+    const map = { no:"any", nothing:"anything", nobody:"anybody", nowhere:"anywhere" };
+    const fix = map[m[3]];
+    addEdit({ start:m.index + m[0].length - m[3].length, end:m.index + m[0].length, text:fix },
+      { type:"grammar", sev:10, label:"双重否定", original:m[3], suggest:fix,
+        detail:`否定句里不要再加否定词，把 "${m[3]}" 改为 "${fix}"。` });
+  }
+
+  /* 13. very + 动词 */
+  for (const m of lower.matchAll(/\bvery\s+(like|enjoy|love|want|need)\b/g)){
+    const verb = m[1];
+    addEdit({ start:m.index, end:m.index + 5 + verb.length, text:verb },
+      { type:"grammar", sev:10, label:"语序", original:`very ${verb}`, suggest:`${verb} … very much`,
+        detail:`"very" 不能直接修饰动词，应说 "${verb} … very much"（very much 放在句末）。` });
+    const after = lower.slice(m.index + m[0].length);
+    const pm = after.search(/[.?!]/);
+    const insAt = pm === -1 ? s.length : m.index + m[0].length + pm;
+    addEdit({ start:insAt, end:insAt, text:" very much" }, null);
+  }
+
+  /* 14. there be 句型 */
+  for (const m of lower.matchAll(/\bthere\s+is\s+(two|three|four|five|six|seven|eight|nine|ten|many|several|both)\b/g)){
+    addEdit({ start:m.index + 6, end:m.index + 8, text:"are" },
+      { type:"grammar", sev:10, label:"there be", original:"there is", suggest:"there are",
+        detail:`后面是复数名词，用 "there are" 而不是 "there is"。` });
+  }
+
+  /* 应用修改 */
+  edits.sort((a, b) => a.start - b.start);
+  let corrected = "", pos = 0;
+  for (const e of edits){
+    corrected += s.slice(pos, e.start) + e.text;
+    pos = e.end;
+  }
+  corrected += s.slice(pos);
+
+  /* 15. 格式：大小写 / 句末标点 */
+  const issues2 = [];
+  let c = corrected;
+  const qStart = /^(what|why|how|where|who|when|which|can|do|does|did|is|are|am|will|would|should|could|may|might|must)\b/i.test(c.trim());
+  if (c && /[a-z]/.test(c[0])){
+    c = c[0].toUpperCase() + c.slice(1);
+    issues2.push({ type:"punct", sev:5, label:"句首大写", original:"（句首小写）", suggest:c[0] + "…",
+      detail:"英语句子首字母要大写。" });
+  }
+  const iCount = (corrected.match(/\bi\b/g) || []).length;
+  c = c.replace(/\bi\b/g, "I");
+  if (iCount > 0){
+    issues2.push({ type:"punct", sev:5, label:"大小写", original:"i", suggest:"I",
+      detail:"英语中第一人称代词 " + '"I"' + " 永远大写。" });
+  }
+  const last = c.trimEnd();
+  if (last && !/[.?!。？！…]/.test(last[last.length - 1])){
+    c = last + (qStart ? "?" : ".");
+    issues2.push({ type:"punct", sev:5, label:"标点", original:"（缺少句末标点）", suggest:qStart ? "?" : ".",
+      detail:"句子末尾应加上" + (qStart ? "问号" : "句号") + "。" });
+  } else if (last !== c){ c = last; }
+  corrected = c;
+
+  const all = issues.concat(issues2);
+  let score = 100;
+  all.forEach(x => score -= x.sev);
+  score = Math.max(0, score);
+  return { original: s, corrected, score, issues: all, issueCount: all.length };
+}
+
+/* ============================================================
+   口语纠错 UI
+============================================================ */
+$("btnDiagnose").addEventListener("click", async ()=>{
+  const text = $("sentence").value;
+  if (!text.trim()){ toast("请先输入或说出一个句子"); return; }
+  const ai = await aiCorrect(text);
+  const r = ai || diagnose(text);
+  showResult(r);
+});
+$("btnClearSent").addEventListener("click", ()=>{ $("sentence").value = ""; $("resultCard").classList.remove("show"); });
+document.querySelectorAll("[data-sample]").forEach(c => c.addEventListener("click", ()=>{
+  $("sentence").value = c.dataset.sample;
+  $("resultCard").classList.remove("show");
+  toast("已填入示例句，点“诊断并纠正”");
+}));
+function showResult(r){
+  $("resultCard").classList.add("show");
+  $("scoreNum").textContent = r.score;
+  const ring = $("scoreRing");
+  const col = r.score >= 90 ? "#10b981" : r.score >= 75 ? "#5b5bf0" : r.score >= 60 ? "#f59e0b" : "#ef4444";
+  ring.style.background = `conic-gradient(${col} ${r.score * 3.6}deg, #eef0f6 0deg)`;
+  let grade, desc;
+  if (r.score >= 90){ grade = "非常棒！"; desc = "句子基本正确，继续保持。"; }
+  else if (r.score >= 75){ grade = "不错，继续加油！"; desc = `有 ${r.issueCount} 处可以改进的地方。`; }
+  else if (r.score >= 60){ grade = "有进步空间"; desc = `发现 ${r.issueCount} 处问题，多读几遍纠正后的句子吧。`; }
+  else { grade = "需要多多练习"; desc = `共有 ${r.issueCount} 处问题，跟着纠正后的句子多读几遍。`; }
+  $("gradeText").textContent = grade;
+  $("scoreDesc").textContent = desc;
+  $("origSent").textContent = r.original;
+  $("fixSent").innerHTML = "";
+  const oLower = r.original.toLowerCase();
+  let oPos = 0;
+  const fixWords = r.corrected.split(/(\s+)/);
+  fixWords.forEach(w => {
+    const clean = w.replace(/\s+/g, "");
+    if (!clean){ $("fixSent").appendChild(document.createTextNode(w)); return; }
+    const found = oLower.indexOf(clean.toLowerCase(), oPos);
+    const changed = found === -1;
+    const b = document.createElement("b");
+    if (changed){ b.className = "fix"; }
+    else { b.removeAttribute("class"); oPos = found + clean.length; }
+    b.textContent = w;
+    $("fixSent").appendChild(b);
+  });
+  const list = $("issueList"); list.innerHTML = "";
+  if (!r.issues.length){
+    list.innerHTML = `<div class="empty" style="padding:12px">没有发现明显错误，这句话说得很好。</div>`;
+  } else {
+    const TAG = { grammar:"语法", cn:"中文词", spell:"拼写", punct:"格式" };
+    r.issues.forEach(x => {
+      const d = document.createElement("div");
+      d.className = "issue";
+      d.innerHTML = `
+        <div class="tag tag-${x.type}">${TAG[x.type] || "语法"}</div>
+        <div class="body">
+          <div><span class="org">${escapeHtml(x.original)}</span><span class="arrow"> → </span><span class="sug">${escapeHtml(x.suggest)}</span></div>
+          <div class="det">${escapeHtml(x.detail)}</div>
+        </div>`;
+      list.appendChild(d);
+    });
+  }
+  window._lastResult = r;
+}
+$("btnSpeak").addEventListener("click", ()=>{
+  const r = window._lastResult;
+  if (r && r.corrected) speak(r.corrected);
+  else toast("请先进行一次诊断");
+});
+$("btnSaveRec").addEventListener("click", ()=>{
+  const r = window._lastResult;
+  if (!r){ toast("请先进行一次诊断"); return; }
+  saveHist({ t: Date.now(), original: r.original, corrected: r.corrected, score: r.score, issueCount: r.issueCount, issues: r.issues });
+  toast("已保存到练习记录");
+});
+
+/* ============================================================
+   初始化 & Service Worker
+============================================================ */
+renderVocab();
+renderHist();
+/* 启动画面：页面加载完成后淡出 */
+window.addEventListener("load", ()=>{
+  setTimeout(()=>{
+    const s = document.getElementById("splash");
+    if (s){ s.classList.add("hide"); setTimeout(()=>s.remove(), 500); }
+  }, 600);
+  if ("serviceWorker" in navigator){
+    navigator.serviceWorker.register("sw.js").catch(()=>{});
+  }
+});
+</script>
+</body>
+</html>
