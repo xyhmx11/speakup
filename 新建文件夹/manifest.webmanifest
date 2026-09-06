@@ -1,0 +1,18 @@
+{
+  "name": "口语帮手 - 英语口语练习",
+  "short_name": "口语帮手",
+  "description": "拍照识别英文单词 + 语音输入英文句子纠错，英语口语练习助手",
+  "lang": "zh-CN",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#5b5bf0",
+  "theme_color": "#5b5bf0",
+  "icons": [
+    { "src": "icons/pwa/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/pwa/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/pwa/icon-144.png", "sizes": "144x144", "type": "image/png", "purpose": "any" },
+    { "src": "icons/pwa/icon-96.png", "sizes": "96x96", "type": "image/png", "purpose": "any" }
+  ]
+}
